@@ -1,0 +1,117 @@
+<!DOCTYPE html>b 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rec Room Web Port Concept</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #1a1a1a;
+            color: white;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        h1 { margin-bottom: 10px; color: #ff3b30; }
+        canvas {
+            border: 4px solid #ff3b30;
+            background-color: #2c2c2e;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .controls { margin-top: 15px; font-size: 14px; color: #aaa; }
+    </style>
+</head>
+<body>
+
+    <h1>Rec Web Port Concept</h1>
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+    <div class="controls">Use <b>W, A, S, D</b> or <b>Arrow Keys</b> to move around the lobby.</div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Player properties
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 20,
+            color: '#ff3b30',
+            speed: 5
+        };
+
+        // Static lobby obstacles / rooms
+        const rooms = [
+            { name: "Paintball", x: 100, y: 100, w: 120, h: 80, color: '#34c759' },
+            { name: "Dodgeball", x: 580, y: 100, w: 120, h: 80, color: '#007aff' },
+            { name: "The Lounge", x: 340, y: 350, w: 140, h: 80, color: '#af52de' }
+        ];
+
+        // Track keyboard inputs
+        const keys = {};
+        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        function update() {
+            // Movement logic
+            if (keys['w'] || keys['arrowup']) player.y -= player.speed;
+            if (keys['s'] || keys['arrowdown']) player.y += player.speed;
+            if (keys['a'] || keys['arrowleft']) player.x -= player.speed;
+            if (keys['d'] || keys['arrowright']) player.x += player.speed;
+
+            // Screen boundaries
+            if (player.x - player.radius < 0) player.x = player.radius;
+            if (player.x + player.radius > canvas.width) player.x = canvas.width - player.radius;
+            if (player.y - player.radius < 0) player.y = player.radius;
+            if (player.y + player.radius > canvas.height) player.y = canvas.height - player.radius;
+        }
+
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Rooms
+            rooms.forEach(room => {
+                ctx.fillStyle = room.color;
+                ctx.fillRect(room.x, room.y, room.w, room.h);
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(room.name, room.x + room.w/2, room.y + room.h/2 + 5);
+            });
+
+            // Draw Player Avatar
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+            ctx.fillStyle = player.color;
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            ctx.closePath();
+
+            // Draw Player Face (Nostalgic Rec Room style)
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(player.x - 6, player.y - 4, 3, 0, Math.PI * 2); // Left eye
+            ctx.arc(player.x + 6, player.y - 4, 3, 0, Math.PI * 2); // Right eye
+            ctx.fill();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
